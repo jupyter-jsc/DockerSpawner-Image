@@ -12,6 +12,6 @@ def get_j4j_dockerspawner_token():
     return token
 
 def get_general_config():
-    with open('/etc/j4j/j4j_mount/j4j_docker/config.json', 'r') as f:
+    with open('/etc/j4j/j4j_mount/j4j_docker/slave/config.json', 'r') as f:
         ret = json.load(f)
     return ret
