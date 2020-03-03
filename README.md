@@ -1,4 +1,4 @@
-# Docker Spawner
+# Docker Master
 
 Backend service for [JupyterHub](https://github.com/jupyter-jsc/Hub-Image).
 
@@ -9,7 +9,7 @@ The following paths have to be mounted:
 ```
 /etc/j4j/j4j_mount/j4j_token
 /etc/j4j/j4j_mount/j4j_common
-/etc/j4j/j4j_mount/j4j_dockerspawner
+/etc/j4j/j4j_mount/j4j_dockermaster
 /etc/j4j/j4j_hdfcloud
 ```
 

@@ -10,11 +10,10 @@ import json
 import os
 
 from logging.handlers import SMTPHandler
-from contextlib import closing
 from flask import Flask
 from flask_restful import Api
 
-from app.jupyterlab import JupyterLabHandler
+from app.jlab import JupyterLabHandler
 from app.health import HealthHandler
 
 # Who should receive the emails if an error or an exception occures?
@@ -43,7 +42,7 @@ mail_handler.setFormatter(logging.Formatter(
 # Override logging.config.file_config, so that the logfilename will be send to the parser, each time the logging.conf will be updated
 def j4j_file_config(fname, defaults=None, disable_existing_loggers=True):
     if not defaults:
-        defaults={'logfilename': '/etc/j4j/j4j_mount/j4j_dockerspawner/logs/{}_{}_o.log'.format(socket.gethostname(), os.getpid())}
+        defaults={'logfilename': '/etc/j4j/j4j_mount/j4j_docker/slave/logs/{}_{}_o.log'.format(socket.gethostname(), os.getpid())}
     import configparser
     if isinstance(fname, configparser.RawConfigParser):
         cp = fname
@@ -66,15 +65,11 @@ def j4j_file_config(fname, defaults=None, disable_existing_loggers=True):
         logging._releaseLock()
 
 logging.config.fileConfig = j4j_file_config
-logging.config.fileConfig('/etc/j4j/j4j_mount/j4j_dockerspawner/logging.conf')
+logging.config.fileConfig('/etc/j4j/j4j_mount/j4j_docker/slave/logging.conf')
 
 # Add database and urls to the FlaskApp. If we change one of these, we have to restart the processes.
 class FlaskApp(Flask):
     log = None
-    with open('/etc/j4j/j4j_mount/j4j_dockerspawner/database.json') as f:
-        database = json.load(f)
-    with open('/etc/j4j/j4j_mount/j4j_common/urls.json') as f:
-        urls = json.load(f)
     def __init__(self, *args, **kwargs):
         self.log = logging.getLogger('J4J_DockerSpawner')
         super(FlaskApp, self).__init__(*args, **kwargs)
@@ -92,5 +87,3 @@ api.add_resource(HealthHandler, '/health')
 
 if __name__ == "__main__":
     application.run(host='0.0.0.0', port=9007)
-    logging.config.stopListening()
-    t_logs.join()
