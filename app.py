@@ -86,4 +86,4 @@ api.add_resource(JupyterLabHandler, '/jlab')
 api.add_resource(HealthHandler, '/health')
 
 if __name__ == "__main__":
-    application.run(host='0.0.0.0', port=9007)
+    application.run(host='0.0.0.0', port=9008)
