@@ -9,15 +9,15 @@ from pathlib import Path
 
 def get_mounts(app_logger, uuidcode, serverfolder, userfolder):
     ret = []
-    ret.append("-v")
+    ret.append("--mount")
     ret.append("type=bind,src={},dst=/home/jovyan".format(serverfolder))
-    ret.append("-v")
+    ret.append("--mount")
     ret.append("type=bind,src={},dst=/home/jovyan/work".format(os.path.join(userfolder, "work")))
-    ret.append("-v")
+    ret.append("--mount")
     ret.append("type=bind,src={},dst=/home/jovyan/Projects/MyProjects".format(os.path.join(userfolder, "Projects", "MyProjects")))
-    ret.append("-v")
+    ret.append("--mount")
     ret.append("type=bind,src={},dst=/home/jovyan/Projects/.share".format(os.path.join(userfolder, "Projects", ".share")))
-    ret.append("-v")
+    ret.append("--mount")
     ret.append("type=bind,src={},dst=/home/jovyan/Projects/.share_result".format(os.path.join(userfolder, "Projects", ".share_result")))
     
     with open(os.path.join(userfolder.replace("@", "_at_"), "projects.txt"), 'r') as f:

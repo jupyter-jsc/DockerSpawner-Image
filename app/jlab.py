@@ -26,7 +26,7 @@ class JupyterLabHandler(Resource):
             # Track actions through different webservices.
             uuidcode = request.headers.get('uuidcode', '<no uuidcode>')
             app.log.info("uuidcode={} - Get JupyterLab Status".format(uuidcode))
-            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers.to_list()))
+            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers))
     
             # Check for the J4J intern token
             utils_common.validate_auth(app.log,
@@ -43,6 +43,7 @@ class JupyterLabHandler(Resource):
             try:
                 app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd1))
                 ret = subprocess.check_output(cmd1, stderr=subprocess.STDOUT, timeout=5)
+                ret = ret.strip().decode("utf-8")
                 app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
             except:
                 app.log.exception("uuidcode={} - Could not check docker status. Return True".format(uuidcode))
@@ -54,6 +55,7 @@ class JupyterLabHandler(Resource):
                 try:
                     app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd2))
                     ret = subprocess.check_output(cmd2, stderr=subprocess.STDOUT, timeout=5)
+                    ret = ret.strip().decode("utf-8")
                     app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
                 except:
                     app.log.exception("uuidcode={} - Could not check docker status. Return True".format(uuidcode))
@@ -67,6 +69,7 @@ class JupyterLabHandler(Resource):
                     try:
                         app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd3))
                         ret = subprocess.check_output(cmd3, stderr=subprocess.STDOUT, timeout=5)
+                        ret = ret.strip().decode("utf-8")
                         app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
                     except:
                         app.log.exception("uuidcode={} - Could not cleanup non running container. Return False".format(uuidcode))
@@ -101,7 +104,7 @@ class JupyterLabHandler(Resource):
             # Track actions through different webservices.
             uuidcode = request.headers.get('uuidcode', '<no uuidcode>')
             app.log.info("uuidcode={} - Start JupyterLab".format(uuidcode))
-            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers.to_list()))
+            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers))
             app.log.trace("uuidcode={} - Json: {}".format(uuidcode, request.json))
     
             # Check for the J4J intern token
@@ -143,15 +146,28 @@ class JupyterLabHandler(Resource):
             cmd.append(config.get("storage-opt"))
             cmd.append("--name")
             cmd.append(uuidcode)
-            for key, value in request_json.get("environments").items():
-                cmd.append("-e")
-                cmd.append("{}='{}'".format(key, value))
+            cmd.append("-e")
+            cmd.append("{}={}".format("HPCACCOUNTS", request_json.get("environments",{}).get("HPCACCOUNTS", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_API_URL", request_json.get("environments",{}).get("JUPYTERHUB_API_URL", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_CLIENT_ID", request_json.get("environments",{}).get("JUPYTERHUB_CLIENT_ID", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_API_TOKEN", request_json.get("environments",{}).get("JUPYTERHUB_API_TOKEN", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_USER", request_json.get("environments",{}).get("JUPYTERHUB_USER", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_SERVICE_PREFIX", request_json.get("environments",{}).get("JUPYTERHUB_SERVICE_PREFIX", "")))
+            cmd.append("-e")
+            cmd.append("{}={}".format("JUPYTERHUB_BASE_URL", request_json.get("environments",{}).get("JUPYTERHUB_BASE_URL", "")))
             cmd.extend(mounts)
             cmd.append(request_json.get("image"))
             cmd.append("/home/jovyan/.start.sh")
-            cmd.append(request_json.get("port"))
+            cmd.append(str(request_json.get("port")))
             cmd.append(request_json.get("servername"))
             cmd.append(request_json.get("jupyterhub_api_url"))
+            cmd.append("&")
+            app.log.debug("uuidcode={} - Run Command: {}".format(uuidcode, cmd))
             subprocess.Popen(cmd)
         except:
             app.log.exception("JLab.post failed. Bugfix required")
@@ -169,7 +185,7 @@ class JupyterLabHandler(Resource):
             # Track actions through different webservices.
             uuidcode = request.headers.get('uuidcode', '<no uuidcode>')
             app.log.info("uuidcode={} - Delete JupyterLab".format(uuidcode))
-            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers.to_list()))
+            app.log.trace("uuidcode={} - Headers: {}".format(uuidcode, request.headers))
     
             # Check for the J4J intern token
             utils_common.validate_auth(app.log,
@@ -187,18 +203,21 @@ class JupyterLabHandler(Resource):
             try:
                 app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd1))
                 ret = subprocess.check_output(cmd1, stderr=subprocess.STDOUT, timeout=5)
+                ret = ret.strip().decode("utf-8")
                 app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
             except:
-                app.log.exception("uuidcode={} - Could not unmount B2DROP".format(uuidcode))
+                app.log.warning("uuidcode={} - Could not unmount B2DROP".format(uuidcode))
             try:
                 app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd2))
                 ret = subprocess.check_output(cmd2, stderr=subprocess.STDOUT, timeout=5)
+                ret = ret.strip().decode("utf-8")
                 app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
             except:
-                app.log.exception("uuidcode={} - Could not unmount HPCMOUNT".format(uuidcode))
+                app.log.warning("uuidcode={} - Could not unmount HPCMOUNT".format(uuidcode))
             try:
                 app.log.trace("uuidcode={} - Cmd: {}".format(uuidcode, cmd3))
                 ret = subprocess.check_output(cmd3, stderr=subprocess.STDOUT, timeout=5)
+                ret = ret.strip().decode("utf-8")
                 app.log.trace("uuidcode={} - Output: {}".format(uuidcode, ret))
             except:
                 app.log.exception("uuidcode={} - Could not stop container".format(uuidcode))
