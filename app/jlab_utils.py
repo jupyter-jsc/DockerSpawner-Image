@@ -26,6 +26,7 @@ def get_mounts(app_logger, uuidcode, serverfolder, userfolder):
     for project in projects_list:
         p = Path(project)
         owner =  p.parent.parent.parent.name.replace("_at_", "@")
-        ret.append("--mount")
-        ret.append("type=bind,src={project},dst=/home/jovyan/Projects/SharedProjects/{owner}_{name}".format(project=project, owner=owner, name=p.name))
+        if os.path.isdir(project):
+            ret.append("--mount")
+            ret.append("type=bind,src={project},dst=/home/jovyan/Projects/SharedProjects/{owner}_{name}".format(project=project, owner=owner, name=p.name))
     return ret
